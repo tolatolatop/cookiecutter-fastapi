@@ -1,75 +1,57 @@
 #!/usr/bin/env python
-
-"""Tests for `{{ cookiecutter.project_slug }}` package."""
-
-{% if cookiecutter.use_pytest == 'y' -%}
+"""Tests for `{{cookiecutter.project_slug}}` package."""
 import pytest
-{% else %}
-import unittest
-{%- endif %}
-{%- if cookiecutter.command_line_interface|lower == 'click' %}
-from click.testing import CliRunner
-{%- endif %}
-
-from {{ cookiecutter.project_slug }} import {{ cookiecutter.project_slug }}
-{%- if cookiecutter.command_line_interface|lower == 'click' %}
-from {{ cookiecutter.project_slug }} import cli
-{%- endif %}
-
-{%- if cookiecutter.use_pytest == 'y' %}
 
 
 @pytest.fixture
-def response():
-    """Sample pytest fixture.
+def client():
+    from {{cookiecutter.project_slug}} import {{cookiecutter.project_slug}}
+    from fastapi.testclient import TestClient
 
-    See more at: http://doc.pytest.org/en/latest/fixture.html
-    """
-    # import requests
-    # return requests.get('https://github.com/audreyr/cookiecutter-pypackage')
+    return TestClient({{cookiecutter.project_slug}}.app)
 
 
-def test_content(response):
+def test_root(client):
     """Sample pytest test function with the pytest fixture as an argument."""
-    # from bs4 import BeautifulSoup
-    # assert 'GitHub' in BeautifulSoup(response.content).title.string
-{%- if cookiecutter.command_line_interface|lower == 'click' %}
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.json() == {"message": "Hello World"}
 
 
-def test_command_line_interface():
-    """Test the CLI."""
-    runner = CliRunner()
-    result = runner.invoke(cli.main)
-    assert result.exit_code == 0
-    assert '{{ cookiecutter.project_slug }}.cli.main' in result.output
-    help_result = runner.invoke(cli.main, ['--help'])
-    assert help_result.exit_code == 0
-    assert '--help  Show this message and exit.' in help_result.output
-{%- endif %}
-{%- else %}
+def test_healthz(client):
+    """Sample pytest test function with the pytest fixture as an argument."""
+    response = client.get("/healthz")
+    assert response.status_code == 200
+    assert response.json() == {"message": "OK"}
 
 
-class Test{{ cookiecutter.project_slug|title }}(unittest.TestCase):
-    """Tests for `{{ cookiecutter.project_slug }}` package."""
+def test_all_endpoints_have_tests():
+    from {{cookiecutter.project_slug}} import {{cookiecutter.project_slug}}
 
-    def setUp(self):
-        """Set up test fixtures, if any."""
+    # 检查所有的测试方法是否以“test_”开头
+    test_methods = [
+        f"/{item.__name__}"
+        for item in globals().values()
+        if callable(item) and item.__name__.startswith("test_")
+    ]
 
-    def tearDown(self):
-        """Tear down test fixtures, if any."""
+    endpoints = [
+        method.replace("test_", "").replace("_", "/")
+        for method in test_methods
+        if method != "test_all_endpoints_have_tests"
+    ]
 
-    def test_000_something(self):
-        """Test something."""
-{%- if cookiecutter.command_line_interface|lower == 'click' %}
+    endpoints.append("/") if "/root" in endpoints else None
+    endpoints.append("/openapi.json")
+    endpoints.append("/docs")
+    endpoints.append("/docs/oauth2-redirect")
+    endpoints.append("/redoc")
 
-    def test_command_line_interface(self):
-        """Test the CLI."""
-        runner = CliRunner()
-        result = runner.invoke(cli.main)
-        assert result.exit_code == 0
-        assert '{{ cookiecutter.project_slug }}.cli.main' in result.output
-        help_result = runner.invoke(cli.main, ['--help'])
-        assert help_result.exit_code == 0
-        assert '--help  Show this message and exit.' in help_result.output
-{%- endif %}
-{%- endif %}
+    # 获取所有的接口路径和方法
+    routes = [
+        route.path for route in {{cookiecutter.project_slug}}.app.routes if hasattr(route, "methods")
+    ]
+
+    # 断言每个接口路径是否出现在测试方法中
+    for route in routes:
+        assert route in endpoints
