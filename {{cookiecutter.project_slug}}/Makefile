@@ -91,4 +91,10 @@ dist: clean ## builds source and wheel package
 	ls -l dist
 
 install: clean ## install the package to the active Python's site-packages
-	python setup.py install
+	poetry install
+
+install-deploy: ## install the package for deploy
+	poetry install --dev
+
+deploy: install ## deploy services
+	uvicorn devfast.devfast:app
