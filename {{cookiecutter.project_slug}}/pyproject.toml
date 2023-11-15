@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "{{ cookiecutter.project_slug }}"
+version = "{{ cookiecutter.version }}"
+description = "{{ cookiecutter.project_short_description }}"
+authors = ["{{ cookiecutter.full_name.replace('\"', '\\\"') }} <{{ cookiecutter.email }}>"]
+readme = "README.md"
+packages = []
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.104.1"
+uvicorn = "^0.24.0.post1"
+python-dotenv = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+wheel = "^0.41.3"
+watchdog = "^3.0.0"
+flake8 = "^6.1.0"
+tox = "^4.11.3"
+coverage = "^7.3.2"
+sphinx = "^7.2.6"
+twine = "^4.0.2"
+pytest = "^7.4.3"
+black = "^23.11.0"
+httpx = "^0.25.1"
