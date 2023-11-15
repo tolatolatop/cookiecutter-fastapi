@@ -2,8 +2,10 @@
 name = "{{ cookiecutter.project_slug }}"
 version = "{{ cookiecutter.version }}"
 description = "{{ cookiecutter.project_short_description }}"
-authors = ["{{ cookiecutter.full_name.replace('\"', '\\\"') }} <{{ cookiecutter.email }}>"]
-readme = "README.md"
+authors = [
+    "{{ cookiecutter.full_name.replace('\"', '\\\"') }} <{{ cookiecutter.email }}>",
+]
+readme = "README.rst"
 packages = []
 
 [tool.poetry.dependencies]
